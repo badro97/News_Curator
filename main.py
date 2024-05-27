@@ -46,7 +46,9 @@ st.markdown(
 # keywords 리스트 초기화
 if "keywords" not in st.session_state:
     st.session_state["keywords"] = []
-
+# # index 리스트 초기화
+# if "index" not in st.session_state:
+#     st.session_state["index"] = [-1]
 
 def autoplay_audio(file_path: str):
     with open(file_path, "rb") as f:
@@ -62,37 +64,52 @@ def autoplay_audio(file_path: str):
 
 
 ## 키워드 추출 함수
+
 import re
 
-class Extractor:
-    def __init__(self):
-        self.stored_index = None
-    def extract_keyword(self, text):
-    
-        pattern = re.compile(r"(?:오늘의\s*|오늘\s*)?(.*?)\s*뉴스")
-        match = pattern.search(text)
-        
-        keyword = None
-        index = None
-        
-        if match:
-            keyword = match.group(1).strip()
-            if keyword.endswith("번째"):
-                index_map = {
-                    '첫': 0, '두': 1, '세': 2, '네': 3, '다섯': 4,
-                    '여섯': 5, '일곱': 6, '여덟': 7, '아홉': 8, '열': 9
-                }
-                prefix = keyword.split()[0]
-                index = index_map.get(prefix, None)
-                self.stored_index = index  
-            if "다음" in text and self.stored_index is not None:
-                self.stored_index += 1  
-                index = self.stored_index
-    
-        return keyword, index
-    
-extract = Extractor()
+# Streamlit의 세션 상태를 사용하여 상태 유지
+if 'current_index' not in st.session_state:
+    st.session_state.current_index = -1
 
+if 'last_index_set' not in st.session_state:
+    st.session_state.last_index_set = False
+
+
+def extract_keyword(text):
+    pattern = re.compile(r"(?:오늘의\s*|오늘\s*)?(.*?)\s*뉴스")
+    match = pattern.search(text)
+    if text.strip() == "뉴스 요약 해줘":
+        return None, st.session_state.current_index
+    
+    if not match:
+        return None, None
+
+    keyword = match.group(1).strip()
+    index = None
+
+    if keyword == "다음":
+        if st.session_state.current_index == -1 or not st.session_state.last_index_set:
+            return keyword, None
+        index = st.session_state.current_index + 1
+        st.session_state.current_index = index
+        st.session_state.last_index_set = True
+    
+    elif keyword.endswith("번째"):
+        index_map = {
+            '첫': 0, '두': 1, '세': 2, '네': 3, '다섯': 4,
+            '여섯': 5, '일곱': 6, '여덟': 7, '아홉': 8, '열': 9
+        }
+        prefix = keyword.split()[0]
+        index = index_map.get(prefix, None)
+        st.session_state.current_index = index
+        st.session_state.last_index_set = True
+    
+    else:
+        index = None
+        st.session_state.current_index = -1
+        st.session_state.last_index_set = False
+    
+    return keyword, index
 
 ## 답변 생성 함수
 def complete(questions, prompt):
@@ -136,31 +153,43 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 if text:
-    keyword, index = extract.extract_keyword(text)
-    stored_index = extract.stored_index
-    print(stored_index) 
-    # st.write(f"주제: {keyword}")
-    # st.write(f"인덱스: {index}")
+    keyword, index = extract_keyword(text)
+    # st.write(st.session_state["keywords"])
+    # st.write(st.session_state["index"])
+    st.write(f"주제: {keyword}")
+    st.write(f"인덱스: {index}")
+    st.write(st.session_state.current_index)
     st.session_state["keywords"].append(keyword)
+    # st.session_state["index"].append(index)
 
     st.session_state["keywords"][-1] = st.session_state["keywords"][-1].replace('인공지능', 'AI')
     # st.write(f"현재 키워드 목록: {st.session_state['keywords']}")
 
-    
+
     if keyword not in ['AI', '부동산']:
         latest_keyword = st.session_state["keywords"][-2]
     else:
         latest_keyword = st.session_state["keywords"][-1]
-
-    meta = f"""
-        SELECT
-            "제목",
-            "내용",
-            "요약"
-        FROM NEWS.CRAWLING_DATA.NAVER_NEWS
-        WHERE "검색어"='{latest_keyword}'
-        LIMIT 10;
-    """
+    if index or keyword==None:
+        n = index
+        meta = f"""
+            SELECT
+                "제목",
+                "내용",
+                "요약"
+            FROM NEWS.CRAWLING_DATA.NAVER_NEWS
+            WHERE "검색어" = '{latest_keyword}'
+            QUALIFY ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) = {n+1};
+        """
+    else:
+        meta = f"""
+            SELECT
+                "제목",
+                "내용",
+                "요약"
+            FROM NEWS.CRAWLING_DATA.NAVER_NEWS
+            WHERE "검색어"='{latest_keyword}';
+        """
 
 
     client = OpenAI(api_key=openai_api_key)
@@ -171,9 +200,9 @@ if text:
     
     st.session_state.messages.append({"role": "assistant", "content": msg})
     st.chat_message("assistant").write(msg)
-    conn = st.connection("snowflake")
-    df = conn.query(meta)
-    st.dataframe(df)
+    # conn = st.connection("snowflake")
+    # df = conn.query(meta)
+    
     
     if msg:
         sound_file = BytesIO()
