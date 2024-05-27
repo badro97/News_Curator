@@ -156,9 +156,9 @@ if text:
     keyword, index = extract_keyword(text)
     # st.write(st.session_state["keywords"])
     # st.write(st.session_state["index"])
-    st.write(f"주제: {keyword}")
-    st.write(f"인덱스: {index}")
-    st.write(st.session_state.current_index)
+    # st.write(f"주제: {keyword}")
+    # st.write(f"인덱스: {index}")
+    # st.write(st.session_state.current_index)
     st.session_state["keywords"].append(keyword)
     # st.session_state["index"].append(index)
 
