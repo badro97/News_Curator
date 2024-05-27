@@ -15,8 +15,33 @@ from io import BytesIO
 # from dotenv import load_dotenv
 # load_dotenv(verbose=True)
 from main_prompts import get_system_prompt
+header = st.container()
+header.title("💬 뉴스 큐레이터")
+header.markdown("<div style='color: gray; padding: 10px; margin: 10px;'> 뉴스를 음성으로 간편하게!", unsafe_allow_html=True)
+header.markdown(
+    """
+    <div style='color: #03417F; background-color:#E8F2FC; padding: 10px; margin: 10px;'>
+    <li>음성 질문을 인식하고 음성 답변을 출력하는 챗봇입니다.</li>
+    <li>AI, 부동산 관련 뉴스 데이터를 담고있습니다.</li>
+    </div>
+    """, unsafe_allow_html=True)
+header.write("""<div class='fixed-header'/>""", unsafe_allow_html=True)
 
-st.title("💬 뉴스 큐레이터")
+### Custom CSS for the sticky header
+st.markdown(
+    """
+<style>
+    div[data-testid="stVerticalBlock"] div:has(div.fixed-header) {
+        position: sticky;
+        top: 2.875rem;
+        background-color: white;
+        z-index: 999;
+    }
+    .fixed-header {
+        border-bottom: 1px solid black;
+    }
+</style>
+    """, unsafe_allow_html=True)
 
 # keywords 리스트 초기화
 if "keywords" not in st.session_state:
@@ -32,10 +57,7 @@ def autoplay_audio(file_path: str):
             <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
             </audio>
             """
-        st.markdown(
-            md,
-            unsafe_allow_html=True,
-        )
+        st.markdown(md, unsafe_allow_html=True)
 
 
 
@@ -86,9 +108,29 @@ def complete(questions, prompt):
 
 openai_api_key = st.secrets.OPENAI_API_KEY
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "Start recording 버튼을 눌러 질문해주세요"}]
+    st.session_state["messages"] = [{"role": "assistant", "content": "좌측 사이드바의 Start recording 버튼을 눌러 질문해주세요"}]
 
-text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
+with st.sidebar:
+    text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
+    st.markdown(
+    """
+    <div style='color: #03417F; background-color:#e0e0eb; padding: 10px; margin: 10px;'>
+    <p><strong>Start recording</strong> 버튼을 누르면 음성 녹음이 시작됩니다.</p>
+    <p>질문이 끝나면 <strong>Stop recording</strong> 버튼을 눌러 녹음을 종료해주세요.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h3 style='padding: 10px; margin: 10px;'> 질문 예시", unsafe_allow_html=True)
+    st.markdown(
+    """
+    <li><strong>AI</strong> 뉴스 알려줘</li>
+    <li><strong>부동산</strong> 뉴스 알려줘</li>
+    <li><strong>N 번째</strong> 뉴스 제목 알려줘</strong></li>
+    <li><strong>N 번째</strong> 뉴스 <strong>요약</strong>해 줘</li>
+    </div>
+    """, unsafe_allow_html=True)
+
+    
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
@@ -120,14 +162,11 @@ if text:
         LIMIT 10;
     """
 
-    
-
 
     client = OpenAI(api_key=openai_api_key)
-
     st.session_state.messages.append({"role": "user", "content": text})
+    
     st.chat_message("user").write(text)
-
     msg = complete(text, get_system_prompt(meta))
     
     st.session_state.messages.append({"role": "assistant", "content": msg})
