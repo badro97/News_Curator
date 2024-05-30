@@ -24,7 +24,7 @@ with st.container():
     # with col2:
     st.title("Drive News Mate")
         # st.markdown("<h3>Drive News Mate</h3>", unsafe_allow_html=True)
-    
+
     st.markdown("<div style='color: gray; padding: 10px; margin: 10px;'> 원하는 뉴스를 음성으로 간편하게!", unsafe_allow_html=True)
     # st.markdown(
     #     """
@@ -33,7 +33,7 @@ with st.container():
     #     <p>AI 뉴스를 알려줘! (현재 AI, 부동산 뉴스 가능) 다음 뉴스로 넘어가고 싶으면 “다음 뉴스” 라고 얘기해주세요 :)</p>
     #     </div>
     #     """, unsafe_allow_html=True)
-    text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
+    
     # col3, col4 = st.columns([1,8])
     # with col3:
     #     manual_button_pressed = st.button("설명서")
@@ -153,12 +153,12 @@ if "messages" not in st.session_state:
 #     toggle_sidebar()
 # if st.session_state.sidebar_visible:    
 with st.sidebar:
-    left_co, cent_co,last_co = st.columns(3)
-    with cent_co:
-        st.image("./drive_news_mate.png", width = 100)
+    # left_co, cent_co,last_co = st.columns(3)
+    # with cent_co:
+    #     st.image("./drive_news_mate.png", width = 100)
     
-    # text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
-
+    text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
+    
     st.markdown(
     """
     <div style='color: #03417F; background-color:#e0e0eb; padding: 10px; margin: 10px;'>
