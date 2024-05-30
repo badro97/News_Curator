@@ -33,11 +33,11 @@ with st.container():
         </div>
         """, unsafe_allow_html=True)
     
-    col3, col4 = st.columns([1,8])
-    with col3:
-        manual_button_pressed = st.button("설명서")
-    with col4:
-        text = speech_to_text(language='ko',just_once=True, key='STT')
+    # col3, col4 = st.columns([1,8])
+    # with col3:
+    #     manual_button_pressed = st.button("설명서")
+    # with col4:
+    text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
     
     st.write("""<div class='fixed-header'/>""", unsafe_allow_html=True)
 
@@ -141,35 +141,35 @@ if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 
-if "sidebar_visible" not in st.session_state:
-    st.session_state.sidebar_visible = False
+# if "sidebar_visible" not in st.session_state:
+#     st.session_state.sidebar_visible = False
 
-## 사이드바 버튼
-def toggle_sidebar():
-    st.session_state.sidebar_visible = not st.session_state.sidebar_visible
+# ## 사이드바 버튼
+# def toggle_sidebar():
+#     st.session_state.sidebar_visible = not st.session_state.sidebar_visible
 
-if manual_button_pressed:
-    toggle_sidebar()
-if st.session_state.sidebar_visible:    
-    with st.sidebar:
-        st.markdown(
-        """
-        <div style='color: #03417F; background-color:#e0e0eb; padding: 10px; margin: 10px;'>
-        <p><strong>Start recording</strong> 버튼을 누르면 음성 녹음이 시작됩니다.</p>
-        <p>질문이 끝나면 <strong>Stop recording</strong> 버튼을 눌러 녹음을 종료해주세요.</p>
-        </div>
-        """, unsafe_allow_html=True)
+# if manual_button_pressed:
+#     toggle_sidebar()
+# if st.session_state.sidebar_visible:    
+#     with st.sidebar:
+#         st.markdown(
+#         """
+#         <div style='color: #03417F; background-color:#e0e0eb; padding: 10px; margin: 10px;'>
+#         <p><strong>Start recording</strong> 버튼을 누르면 음성 녹음이 시작됩니다.</p>
+#         <p>질문이 끝나면 <strong>Stop recording</strong> 버튼을 눌러 녹음을 종료해주세요.</p>
+#         </div>
+#         """, unsafe_allow_html=True)
 
-        st.markdown("<h3 style='padding: 10px; margin: 10px;'> 질문 예시", unsafe_allow_html=True)
-        st.markdown(
-        """
-        <li><strong>AI</strong> 뉴스 알려줘</li>
-        <li><strong>부동산</strong> 뉴스 알려줘</li>
-        <li><strong>N 번째</strong> 뉴스 제목 알려줘</strong></li>
-        <li><strong>다음</strong> 뉴스 알려줘</li>
-        <li><strong>N 번째</strong> 뉴스 <strong>요약</strong>해 줘</li>
-        </div>
-        """, unsafe_allow_html=True)
+#         st.markdown("<h3 style='padding: 10px; margin: 10px;'> 질문 예시", unsafe_allow_html=True)
+#         st.markdown(
+#         """
+#         <li><strong>AI</strong> 뉴스 알려줘</li>
+#         <li><strong>부동산</strong> 뉴스 알려줘</li>
+#         <li><strong>N 번째</strong> 뉴스 제목 알려줘</strong></li>
+#         <li><strong>다음</strong> 뉴스 알려줘</li>
+#         <li><strong>N 번째</strong> 뉴스 <strong>요약</strong>해 줘</li>
+#         </div>
+#         """, unsafe_allow_html=True)
 
     
 
