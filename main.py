@@ -15,17 +15,31 @@ from io import BytesIO
 # from dotenv import load_dotenv
 # load_dotenv(verbose=True)
 from main_prompts import get_system_prompt
-header = st.container()
-header.title("💬 뉴스 큐레이터")
-header.markdown("<div style='color: gray; padding: 10px; margin: 10px;'> 뉴스를 음성으로 간편하게!", unsafe_allow_html=True)
-header.markdown(
-    """
-    <div style='color: #03417F; background-color:#E8F2FC; padding: 10px; margin: 10px;'>
-    <li>음성 질문을 인식하고 음성 답변을 출력하는 챗봇입니다.</li>
-    <li>AI, 부동산 관련 뉴스 데이터를 담고있습니다.</li>
-    </div>
-    """, unsafe_allow_html=True)
-header.write("""<div class='fixed-header'/>""", unsafe_allow_html=True)
+# header = st.container()
+
+with st.container():
+    col1, col2 = st.columns([1,4])
+    with col1:
+        st.image("./drive_news_mate.jpeg", width = 100)
+    with col2:
+        st.title("Drive News Mate")
+
+    st.markdown("<div style='color: gray; padding: 10px; margin: 10px;'> 원하는 주제의 뉴스를 음성으로 간편하게!", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style='color: #03417F; background-color:#E8F2FC; padding: 10px; margin: 10px;'>
+        <p>아래 버튼을 클릭하여 궁금한 주제의 뉴스를 물어보세요!</p>
+        <p>AI 뉴스를 알려줘! (현재 AI, 부동산 뉴스 가능) 다음 뉴스로 넘어가고 싶으면 “다음 뉴스” 라고 얘기해주세요 :)</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    col3, col4 = st.columns([1,8])
+    with col3:
+        manual_button_pressed = st.button("설명서")
+    with col4:
+        text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
+    
+    st.write("""<div class='fixed-header'/>""", unsafe_allow_html=True)
 
 ### Custom CSS for the sticky header
 st.markdown(
@@ -46,9 +60,7 @@ st.markdown(
 # keywords 리스트 초기화
 if "keywords" not in st.session_state:
     st.session_state["keywords"] = []
-# # index 리스트 초기화
-# if "index" not in st.session_state:
-#     st.session_state["index"] = [-1]
+
 
 def autoplay_audio(file_path: str):
     with open(file_path, "rb") as f:
@@ -125,27 +137,39 @@ def complete(questions, prompt):
 
 openai_api_key = st.secrets.OPENAI_API_KEY
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "좌측 사이드바의 Start recording 버튼을 눌러 질문해주세요"}]
+    # st.session_state["messages"] = [{"role": "assistant", "content": "AI 뉴스를 알려줘! (AI, 부동산 뉴스 가능) 다음 뉴스로 넘어가고 싶으면 “다음 뉴스” 라고 얘기해주세요 :)"}]
+    st.session_state["messages"] = []
 
-with st.sidebar:
-    text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
-    st.markdown(
-    """
-    <div style='color: #03417F; background-color:#e0e0eb; padding: 10px; margin: 10px;'>
-    <p><strong>Start recording</strong> 버튼을 누르면 음성 녹음이 시작됩니다.</p>
-    <p>질문이 끝나면 <strong>Stop recording</strong> 버튼을 눌러 녹음을 종료해주세요.</p>
-    </div>
-    """, unsafe_allow_html=True)
 
-    st.markdown("<h3 style='padding: 10px; margin: 10px;'> 질문 예시", unsafe_allow_html=True)
-    st.markdown(
-    """
-    <li><strong>AI</strong> 뉴스 알려줘</li>
-    <li><strong>부동산</strong> 뉴스 알려줘</li>
-    <li><strong>N 번째</strong> 뉴스 제목 알려줘</strong></li>
-    <li><strong>N 번째</strong> 뉴스 <strong>요약</strong>해 줘</li>
-    </div>
-    """, unsafe_allow_html=True)
+if "sidebar_visible" not in st.session_state:
+    st.session_state.sidebar_visible = False
+
+## 사이드바 버튼
+def toggle_sidebar():
+    st.session_state.sidebar_visible = not st.session_state.sidebar_visible
+
+if manual_button_pressed:
+    toggle_sidebar()
+if st.session_state.sidebar_visible:    
+    with st.sidebar:
+        st.markdown(
+        """
+        <div style='color: #03417F; background-color:#e0e0eb; padding: 10px; margin: 10px;'>
+        <p><strong>Start recording</strong> 버튼을 누르면 음성 녹음이 시작됩니다.</p>
+        <p>질문이 끝나면 <strong>Stop recording</strong> 버튼을 눌러 녹음을 종료해주세요.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<h3 style='padding: 10px; margin: 10px;'> 질문 예시", unsafe_allow_html=True)
+        st.markdown(
+        """
+        <li><strong>AI</strong> 뉴스 알려줘</li>
+        <li><strong>부동산</strong> 뉴스 알려줘</li>
+        <li><strong>N 번째</strong> 뉴스 제목 알려줘</strong></li>
+        <li><strong>다음</strong> 뉴스 알려줘</li>
+        <li><strong>N 번째</strong> 뉴스 <strong>요약</strong>해 줘</li>
+        </div>
+        """, unsafe_allow_html=True)
 
     
 
@@ -154,17 +178,8 @@ for msg in st.session_state.messages:
 
 if text:
     keyword, index = extract_keyword(text)
-    # st.write(st.session_state["keywords"])
-    # st.write(st.session_state["index"])
-    # st.write(f"주제: {keyword}")
-    # st.write(f"인덱스: {index}")
-    # st.write(st.session_state.current_index)
     st.session_state["keywords"].append(keyword)
-    # st.session_state["index"].append(index)
-
     st.session_state["keywords"][-1] = st.session_state["keywords"][-1].replace('인공지능', 'AI')
-    # st.write(f"현재 키워드 목록: {st.session_state['keywords']}")
-
 
     if keyword not in ['AI', '부동산']:
         latest_keyword = st.session_state["keywords"][-2]
@@ -215,6 +230,7 @@ if text:
 
         autoplay_audio(temp_file_path)
         os.remove(temp_file_path)
+
         if not st.session_state["keywords"][-1] in ['AI','부동산']:
             st.session_state["keywords"].pop()
 
