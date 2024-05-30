@@ -18,11 +18,12 @@ from main_prompts import get_system_prompt
 # header = st.container()
 
 with st.container():
-    col1, col2 = st.columns([1,4])
+    col1, col2 = st.columns([1,3])
     with col1:
         st.image("./News_Mate.jpeg", width = 50)
     with col2:
-        st.title("Drive News Mate")
+        # st.title("Drive News Mate")
+        st.markdown("<h3>Drive News Mate</h3>", unsafe_allow_html=True)
 
     st.markdown("<div style='color: gray; padding: 10px; margin: 10px;'> 원하는 뉴스를 음성으로 간편하게!", unsafe_allow_html=True)
     # st.markdown(
