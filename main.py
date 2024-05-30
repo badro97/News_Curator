@@ -37,7 +37,7 @@ with st.container():
     with col3:
         manual_button_pressed = st.button("설명서")
     with col4:
-        text = speech_to_text(language='ko', use_container_width=True, just_once=True, key='STT')
+        text = speech_to_text(language='ko',just_once=True, key='STT')
     
     st.write("""<div class='fixed-header'/>""", unsafe_allow_html=True)
 
