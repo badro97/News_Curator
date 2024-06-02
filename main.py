@@ -18,11 +18,11 @@ from main_prompts import get_system_prompt
 # header = st.container()
 
 with st.container():
-    # col1, col2 = st.columns([1,3])
-    # with col1:
-    #     st.image("./News_Mate.jpeg", width = 50)
-    # with col2:
-    st.title("Drive News Mate")
+    col1, col2 = st.columns([1,4])
+    with col1:
+        st.image("./drive_news_mate.png", width = 100)
+    with col2:
+        st.title("Drive News Mate")
         # st.markdown("<h3>Drive News Mate</h3>", unsafe_allow_html=True)
 
     st.markdown("<div style='color: gray; padding: 10px; margin: 10px;'> 원하는 뉴스를 음성으로 간편하게!", unsafe_allow_html=True)
@@ -138,8 +138,8 @@ def complete(questions, prompt):
 
 openai_api_key = st.secrets.OPENAI_API_KEY
 if "messages" not in st.session_state:
-    # st.session_state["messages"] = [{"role": "assistant", "content": "AI 뉴스를 알려줘! (AI, 부동산 뉴스 가능) 다음 뉴스로 넘어가고 싶으면 “다음 뉴스” 라고 얘기해주세요 :)"}]
-    st.session_state["messages"] = []
+    st.session_state["messages"] = [{"role": "assistant", "content": "좌측 사이드바의 Start recording 버튼을 눌러 질문해주세요"}]
+    # st.session_state["messages"] = []
 
 
 # if "sidebar_visible" not in st.session_state:
