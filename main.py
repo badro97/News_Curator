@@ -132,7 +132,9 @@ def complete(questions, prompt):
                 {"role": "system", "content": prompt},
                 {"role":"user", "content": f"{questions}"}
             ],
-        max_tokens = 4096
+        max_tokens = 4096,
+        temperature = 0,
+        top_p = 0
     )
     response = res.choices[0].message.content
     return response
